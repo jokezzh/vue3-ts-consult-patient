@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { mobileRules, passwordRules } from '@/utils/rules'
 import { ref } from 'vue'
-import { showToast } from 'vant'
+import { showSuccessToast, showToast } from 'vant'
+import { loginByPassword } from '@/services/user'
+import { useUserStore } from '@/stores'
 
 //表单验证数据
 const mobile = ref('')
 const password = ref('')
 const agree = ref(false)
+
 //登录
-const onSubmit = () => {
+const route = useRoute()
+const store = useUserStore()
+const onSubmit = async () => {
   if (!agree.value) return showToast('请勾选协议')
-  console.log('1')
+  //登录操作
+  const res = await loginByPassword(mobile.value, password.value)
+  store.setUser(res.data)
+  showSuccessToast('登陆成功')
+  router.replace((route.query.returnUrl as string) || '/user')
 }
 
 //跳转注册
