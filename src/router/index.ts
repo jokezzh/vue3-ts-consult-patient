@@ -1,6 +1,15 @@
 import { useUserStore } from '@/stores'
 import { createRouter, createWebHistory } from 'vue-router'
 
+//导入进度条
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+//关闭环形进度条图标
+NProgress.configure({
+  showSpinner: false
+})
+
 const router = createRouter({
   //默认参数'/' 基础路径
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +51,8 @@ const router = createRouter({
 
 // 全局前置导航
 router.beforeEach((to) => {
+  //开启进度条
+  NProgress.start()
   //获取token
   const store = useUserStore()
   //白名单
@@ -53,6 +64,8 @@ router.beforeEach((to) => {
 //后置导航
 router.afterEach((to) => {
   document.title = `${to.meta.title || ''} - 优医问诊`
+  //关闭进度条
+  NProgress.done()
 })
 
 export default router
