@@ -86,7 +86,8 @@ onUnmounted(() => {
         :rules="passwordRules"
         placeholder="请输入密码"
         type="password"
-      ></van-field>
+      >
+      </van-field>
       <!-- 短信登录 -->
       <van-field
         v-else
