@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { getPatientList } from '@/services/user'
-import type { PatientList } from '@/types/user'
-import { onMounted, ref } from 'vue'
+import { addPatient, getPatientList } from '@/services/user'
+import type { Patient, PatientList } from '@/types/user'
+import { idCardRules, nameRules } from '@/utils/rules'
+import { showConfirmDialog, showSuccessToast, type FormInstance } from 'vant'
+import { computed, onMounted, ref } from 'vue'
 
 // 1. 页面初始化加载数据
 const list = ref<PatientList>([])
@@ -22,7 +24,45 @@ const options = ref([
 //侧滑层
 const show = ref(false)
 const showPopup = () => {
+  //清空表单数据
+  patient.value = { ...initPatient }
   show.value = true
+}
+const initPatient: Patient = {
+  name: '',
+  idCard: '',
+  gender: 1,
+  defaultFlag: 0
+}
+const patient = ref<Patient>({ ...initPatient })
+
+// 支持复选框
+const defaultFlag = computed({
+  get: () => (patient.value.defaultFlag === 1 ? true : false),
+  set: (value) => (patient.value.defaultFlag = value ? 1 : 0)
+})
+
+// 保存患者
+const form = ref<FormInstance>()
+const onSubmit = async () => {
+  //表单整体校验
+  await form.value?.validate()
+  // 性别校验
+  const gender = +patient.value.idCard.slice(-2, -1) % 2
+  if (gender !== patient.value.gender) {
+    await showConfirmDialog({
+      title: '温馨提示',
+      message: '性别与身份证不一致 \n 您确认要提交吗？'
+    })
+  }
+
+  //提交
+  await addPatient(patient.value)
+
+  //关闭弹层，刷新列表，提示
+  show.value = false
+  loadList()
+  showSuccessToast('添加成功')
 }
 </script>
 
@@ -49,28 +89,41 @@ const showPopup = () => {
       <div class="patient-tip">最多可添加 6 人</div>
     </div>
     <!-- 侧边栏 -->
-    <van-popup v-model:show="show" position="right">
+    <van-popup position="right" v-model:show="show">
       <cp-nav-bar
-        title="添加患者"
+        :title="patient.id ? '编辑患者' : '添加患者'"
         right-text="保存"
+        @click-right="onSubmit"
         :back="() => (show = false)"
-      >
-        <van-form autocomplete="off" ref="form">
-          <van-field label="真实姓名" placeholder="请输入真实姓名" />
-          <van-field label="身份证号" placeholder="请输入身份证号" />
-          <van-field label="性别" class="pb4">
-            <!-- 单选按钮组件 -->
-            <template #input>
-              <cp-radio-btn :options="options"></cp-radio-btn>
-            </template>
-          </van-field>
-          <van-field label="默认就诊人">
-            <template #input>
-              <van-checkbox :icon-size="18" round />
-            </template>
-          </van-field>
-        </van-form>
-      </cp-nav-bar>
+      ></cp-nav-bar>
+      <van-form autocomplete="off" ref="form">
+        <van-field
+          v-model="patient.name"
+          label="真实姓名"
+          placeholder="请输入真实姓名"
+          :rules="nameRules"
+        />
+        <van-field
+          v-model="patient.idCard"
+          label="身份证号"
+          placeholder="请输入身份证号"
+          :rules="idCardRules"
+        />
+        <van-field label="性别" class="pb4">
+          <!-- 单选按钮组件 -->
+          <template #input>
+            <cp-radio-btn
+              v-model="patient.gender"
+              :options="options"
+            ></cp-radio-btn>
+          </template>
+        </van-field>
+        <van-field label="默认就诊人">
+          <template #input>
+            <van-checkbox v-model="defaultFlag" :icon-size="18" round />
+          </template>
+        </van-field>
+      </van-form>
     </van-popup>
   </div>
 </template>
@@ -80,9 +133,41 @@ const showPopup = () => {
   padding: 46px 0 80px;
   :deep() {
     .van-popup {
-      width: 80%;
+      width: 100%;
       height: 100%;
+      padding-top: 46px;
+      box-sizing: border-box;
     }
+  }
+}
+.patient-change {
+  padding: 15px;
+  > h3 {
+    font-weight: normal;
+    margin-bottom: 5px;
+  }
+  > p {
+    color: var(--cp-text3);
+  }
+}
+.patient-next {
+  padding: 15px;
+  background-color: #fff;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  box-sizing: border-box;
+}
+
+// 底部操作栏
+.van-action-bar {
+  padding: 0 10px;
+  margin-bottom: 10px;
+  .van-button {
+    color: var(--cp-price);
+    background-color: var(--cp-bg);
   }
 }
 
