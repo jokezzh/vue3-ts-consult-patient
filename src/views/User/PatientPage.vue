@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { addPatient, getPatientList } from '@/services/user'
+import {
+  addPatient,
+  delPatient,
+  editPatient,
+  getPatientList
+} from '@/services/user'
 import type { Patient, PatientList } from '@/types/user'
 import { idCardRules, nameRules } from '@/utils/rules'
 import { showConfirmDialog, showSuccessToast, type FormInstance } from 'vant'
@@ -23,9 +28,18 @@ const options = ref([
 
 //侧滑层
 const show = ref(false)
-const showPopup = () => {
-  //清空表单数据
-  patient.value = { ...initPatient }
+const showPopup = (item?: Patient) => {
+  if (item) {
+    //编辑 回显信息
+    const { id, name, idCard, gender, defaultFlag } = item
+    patient.value = { id, name, idCard, gender, defaultFlag }
+  } else {
+    //新增
+    //清空表单数据
+    form.value?.resetValidation()
+    patient.value = { ...initPatient }
+  }
+
   show.value = true
 }
 const initPatient: Patient = {
@@ -57,12 +71,34 @@ const onSubmit = async () => {
   }
 
   //提交
-  await addPatient(patient.value)
+  if (patient.value.id) {
+    //编辑患者
+    await editPatient(patient.value)
+    showSuccessToast('修改成功')
+  } else {
+    //新增患者
+    await addPatient(patient.value)
+    showSuccessToast('添加成功')
+  }
 
-  //关闭弹层，刷新列表，提示
+  //关闭弹层，刷新列表
   show.value = false
   loadList()
-  showSuccessToast('添加成功')
+}
+
+//删除患者
+const remove = async () => {
+  if (patient.value.id) {
+    // 提示框 删除操作 提示成功 关闭弹层 刷新列表
+    await showConfirmDialog({
+      title: '温馨提示',
+      message: ` 您确认要删除患者 ${patient.value.name} 的信息吗`
+    })
+    await delPatient(patient.value.id)
+    show.value = false
+    loadList()
+    showSuccessToast('删除成功')
+  }
 }
 </script>
 
@@ -79,10 +115,12 @@ const onSubmit = async () => {
           <span>{{ item.genderValue }}</span>
           <span>{{ item.age }}岁</span>
         </div>
-        <div class="icon"><cp-icon name="user-edit" /></div>
+        <div class="icon" @click="showPopup(item)">
+          <cp-icon name="user-edit" />
+        </div>
         <div class="tag" v-if="item.defaultFlag === 1">默认</div>
       </div>
-      <div class="patient-add" v-if="list.length < 6" @click="showPopup">
+      <div class="patient-add" v-if="list.length < 6" @click="showPopup()">
         <cp-icon name="user-add" />
         <p>添加患者</p>
       </div>
@@ -124,6 +162,11 @@ const onSubmit = async () => {
           </template>
         </van-field>
       </van-form>
+
+      <!-- 删除按钮 -->
+      <van-action-bar v-if="patient.id" @click="remove">
+        <van-action-bar-button>删除</van-action-bar-button>
+      </van-action-bar>
     </van-popup>
   </div>
 </template>
