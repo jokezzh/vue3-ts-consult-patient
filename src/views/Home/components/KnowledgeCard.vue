@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { useFollow } from '@/composables'
 import type { Knowledge } from '@/types/consult'
 
 defineProps<{
   item: Knowledge
 }>()
+
+//使用封装函数实现关注
+const { loading, follow } = useFollow('knowledge')
 </script>
 
 <template>
@@ -17,7 +21,13 @@ defineProps<{
           {{ item.creatorTitles }}
         </p>
       </div>
-      <van-button class="btn" size="small" round>
+      <van-button
+        class="btn"
+        size="small"
+        round
+        :loading="loading"
+        @click="follow(item)"
+      >
         {{ item.likeFlag === 1 ? '已关注' : '+ 关注' }}
       </van-button>
     </div>
