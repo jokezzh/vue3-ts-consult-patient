@@ -1,7 +1,21 @@
 <script lang="ts" setup>
+import { followOrUnfollow } from '@/services/consult'
 import type { Doctor } from '@/types/consult'
+import { ref } from 'vue'
 
 defineProps<{ item: Doctor }>()
+
+//关注相关
+const loading = ref(false)
+const follow = async (item: Doctor) => {
+  loading.value = true
+  try {
+    await followOrUnfollow(item.id)
+    item.likeFlag = item.likeFlag === 1 ? 0 : 1
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 <template>
   <div class="doctor-card">
@@ -9,7 +23,13 @@ defineProps<{ item: Doctor }>()
     <p class="name">{{ item.name }}</p>
     <p class="van-ellipsis">{{ item.hospitalName }} {{ item.depName }}</p>
     <p>{{ item.positionalTitles }}</p>
-    <van-button round size="small" type="primary">
+    <van-button
+      round
+      size="small"
+      type="primary"
+      :loading="loading"
+      @click="follow(item)"
+    >
       {{ item.likeFlag === 1 ? '已关注' : '+ 关注' }}
     </van-button>
   </div>
