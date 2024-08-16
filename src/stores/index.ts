@@ -9,3 +9,4 @@ pinia.use(presist)
 export default pinia
 
 export * from './modules/user'
+export * from './modules/consult'
