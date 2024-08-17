@@ -144,3 +144,9 @@ type SubDep = {
 export type TopDep = SubDep & {
   child: SubDep[]
 }
+
+//病情描述数据
+export type ConsultIllness = Pick<
+  PartialConsult,
+  'illnessDesc' | 'illnessTime' | 'consultFlag' | 'pictures'
+>
