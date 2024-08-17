@@ -4,7 +4,8 @@ import type {
   PageParams,
   DoctorPage,
   FollowType,
-  TopDep
+  TopDep,
+  Image
 } from '@/types/consult'
 import { request } from '@/utils/request'
 
@@ -22,3 +23,10 @@ export const followOrUnfollow = (id: string, type: FollowType = 'doc') =>
 
 // 获取科室
 export const getAllDep = () => request<TopDep[]>('/dep/all')
+
+//上传图片
+export const uploadImage = (file: File) => {
+  const fd = new FormData()
+  fd.append('file', file)
+  return request<Image>('upload', 'POST', fd)
+}
