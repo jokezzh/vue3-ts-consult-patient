@@ -7,6 +7,12 @@ import { onMounted, onUnmounted } from 'vue'
 import { baseURL } from '@/utils/request'
 import { useUserStore } from '@/stores'
 import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import type { Message, TimeMessages } from '@/types/room'
+import { MsgType } from '@/enums'
+
+// 信息数组
+const list = ref<Message[]>([])
 
 const store = useUserStore()
 const route = useRoute()
@@ -28,6 +34,22 @@ onMounted(() => {
   })
   socket.on('error', (err) => {
     console.log('error', err)
+  })
+  // 聊天记录
+  socket.on('chatMsgList', ({ data }: { data: TimeMessages[] }) => {
+    // 准备转换常规消息列表
+    const arr: Message[] = []
+    data.forEach((item, i) => {
+      arr.push({
+        msgType: MsgType.Notify,
+        msg: { content: item.createTime },
+        createTime: item.createTime,
+        id: item.createTime
+      })
+      arr.push(...item.items)
+    })
+    // 追加到聊天消息列表
+    list.value.unshift(...arr)
   })
 })
 onUnmounted(() => {
