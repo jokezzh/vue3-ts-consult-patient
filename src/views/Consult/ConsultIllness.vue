@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { IllnessTime } from '@/enums'
 import { uploadImage } from '@/services/consult'
 import { useConsultStore } from '@/stores'
 import type { ConsultIllness, Image } from '@/types/consult'
@@ -13,16 +12,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 //选项数据
-const timeOption = [
-  { label: '一周内', value: IllnessTime.Week },
-  { label: '一月内', value: IllnessTime.Month },
-  { label: '半年内', value: IllnessTime.HalfYear },
-  { label: '半年以上', value: IllnessTime.More }
-]
-const flagOption = [
-  { label: '就诊过', value: 1 },
-  { label: '未就诊过', value: 0 }
-]
+import { flagOptions, timeOptions } from '@/services/constants'
 
 //表单数据
 const form = ref<ConsultIllness>({
@@ -124,14 +114,14 @@ onMounted(() => {
       <div class="item">
         <p>本次患病多久了？</p>
         <cp-radio-btn
-          :options="timeOption"
+          :options="timeOptions"
           v-model="form.illnessTime"
         ></cp-radio-btn>
       </div>
       <div class="item">
         <p>此次病情是否去医院就诊过？</p>
         <cp-radio-btn
-          :options="flagOption"
+          :options="flagOptions"
           v-model="form.consultFlag"
         ></cp-radio-btn>
       </div>

@@ -64,7 +64,11 @@ onUnmounted(() => {
     <room-status></room-status>
 
     <!-- 消息 -->
-    <room-message></room-message>
+    <room-message
+      v-for="item in list"
+      :key="item.id"
+      :item="item"
+    ></room-message>
 
     <!-- 操作栏 -->
     <room-action></room-action>
