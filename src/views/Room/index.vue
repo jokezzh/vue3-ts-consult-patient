@@ -74,6 +74,8 @@ onMounted(() => {
 
     //第一次加载信息列表
     if (initialMsg.value) {
+      // 已读消息
+      socket.emit('updateMsgStatus', arr[arr.length - 1].id)
       nextTick(() => {
         window.scrollTo(0, document.body.scrollHeight)
         initialMsg.value = false
@@ -85,6 +87,8 @@ onMounted(() => {
 
   // 接收消息
   socket.on('receiveChatMsg', async (event) => {
+    //已读消息
+    socket.emit('updateMsgStatus', event.id)
     list.value.push(event)
     await nextTick()
     window.scrollTo(0, document.body.scrollHeight)
