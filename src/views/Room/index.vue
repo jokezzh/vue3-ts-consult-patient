@@ -3,7 +3,7 @@ import RoomStatus from './components/RoomStatus.vue'
 import RoomAction from './components/RoomAction.vue'
 import RoomMessage from './components/RoomMessage.vue'
 import { io, Socket } from 'socket.io-client'
-import { onMounted, onUnmounted } from 'vue'
+import { nextTick, onMounted, onUnmounted } from 'vue'
 import { baseURL } from '@/utils/request'
 import { useUserStore } from '@/stores'
 import { useRoute } from 'vue-router'
@@ -66,10 +66,29 @@ onMounted(() => {
   })
   // 问诊室状态改变再次获取订单详情
   socket.on('statusChange', () => loadConsult())
+
+  // 接收消息
+  socket.on('receiveChatMsg', async (event) => {
+    list.value.push(event)
+    await nextTick()
+    window.scrollTo(0, document.body.scrollHeight)
+  })
 })
 onUnmounted(() => {
   socket.close()
 })
+
+//发送文本文字
+
+const onSendText = (text: string) => {
+  // 发送信息需要  发送人  收消息人  消息类型  消息内容
+  socket.emit('sendChatMsg', {
+    from: store.user?.id,
+    to: consult.value?.docInfo?.id,
+    msgType: MsgType.MsgText,
+    msg: { content: text }
+  })
+}
 </script>
 
 <template>
@@ -91,6 +110,7 @@ onUnmounted(() => {
     <!-- 操作栏 -->
     <room-action
       :disabled="consult?.status !== OrderType.ConsultChat"
+      @send-text="onSendText"
     ></room-action>
   </div>
 </template>
