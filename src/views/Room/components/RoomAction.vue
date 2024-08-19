@@ -1,14 +1,30 @@
 <script setup lang="ts">
+import { uploadImage } from '@/services/consult'
+import type { Image } from '@/types/consult'
+import { showLoadingToast, type UploaderAfterRead } from 'vant'
 import { ref } from 'vue'
 defineProps<{
   disabled: boolean
 }>()
-const emit = defineEmits<{ (e: 'send-text', text: string): void }>()
+const emit = defineEmits<{
+  (e: 'send-text', text: string): void
+  (e: 'send-image', img: Image): void
+}>()
 //发送文本消息
 const text = ref('')
 const sendText = () => {
   emit('send-text', text.value)
   text.value = ''
+}
+
+//发送图片信息
+const sendImage: UploaderAfterRead = async (data) => {
+  if (Array.isArray(data)) return
+  if (!data.file) return
+  const t = showLoadingToast({ message: '图片正在上传', duration: 0 })
+  const res = await uploadImage(data.file)
+  t.close()
+  emit('send-image', res.data)
 }
 </script>
 
@@ -24,7 +40,11 @@ const sendText = () => {
       v-model="text"
       @keyup.enter="sendText"
     ></van-field>
-    <van-uploader :preview-image="false" :disabled="disabled">
+    <van-uploader
+      :after-read="sendImage"
+      :preview-image="false"
+      :disabled="disabled"
+    >
       <cp-icon name="consult-img" />
     </van-uploader>
   </div>
