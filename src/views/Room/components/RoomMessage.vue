@@ -7,6 +7,7 @@ import { showImagePreview, showToast } from 'vant'
 import { useUserStore } from '@/stores'
 import dayjs from 'dayjs'
 import { getPrescriptionPic } from '@/services/consult'
+import EvaluateCard from './EvaluateCard.vue'
 
 defineProps<{
   item: Message
@@ -81,11 +82,14 @@ const showPrescription = async (id?: string) => {
   </div>
 
   <!-- 通知-结束 -->
-  <!-- <div class="msg msg-tip msg-tip-cancel">
+  <div
+    class="msg msg-tip msg-tip-cancel"
+    v-if="item.msgType === MsgType.NotifyCancel"
+  >
     <div class="content">
-      <span>订单取消</span>
+      <span>{{ item.msg.content }}</span>
     </div>
-  </div> -->
+  </div>
 
   <!-- 发送文字 -->
   <!-- 我发的消息 -->
@@ -175,6 +179,14 @@ const showPrescription = async (id?: string) => {
   </div>
 
   <!-- 评价卡片，后期实现 -->
+  <div
+    class="msg msg-comment"
+    v-if="
+      item.msgType === MsgType.CardEva || item.msgType === MsgType.CardEvaForm
+    "
+  >
+    <evaluate-card :evaluateDoc="item.msg.evaluateDoc" />
+  </div>
 </template>
 
 <style lang="scss" scoped>
