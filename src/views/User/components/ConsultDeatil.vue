@@ -4,9 +4,13 @@ import { getConsultOrderDetail } from '@/services/consult'
 import type { ConsultOrderItem } from '@/types/consult'
 import { getConsultFlagText, getIllnessTimeText } from '@/utils/filter'
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ConsultMore from './ConsultMore.vue'
-import { useCancelOrder } from '@/composables'
+import {
+  useCancelOrder,
+  useDeleteOrder,
+  useShowPrescription
+} from '@/composables'
 
 // 获取订单详情
 const route = useRoute()
@@ -18,6 +22,14 @@ onMounted(async () => {
 
 //取消订单
 const { loading, cancelConsultOrder } = useCancelOrder()
+
+const router = useRouter()
+//删除订单
+const { deleteLoading, deleteConsultOrder } = useDeleteOrder(() => {
+  router.push('/user/consult')
+})
+// 查看处方
+const { onShowPrescription } = useShowPrescription()
 </script>
 
 <template>
@@ -127,7 +139,12 @@ const { loading, cancelConsultOrder } = useCancelOrder()
       class="detail-action van-hairline--top"
       v-if="item.status === OrderType.ConsultChat"
     >
-      <van-button type="default" round v-if="item.prescriptionId">
+      <van-button
+        type="default"
+        round
+        v-if="item.prescriptionId"
+        @click="onShowPrescription(item.prescriptionId)"
+      >
         查看处方
       </van-button>
       <van-button type="primary" round :to="`/room?orderId=${item.id}`">
@@ -139,7 +156,11 @@ const { loading, cancelConsultOrder } = useCancelOrder()
       class="detail-action van-hairline--top"
       v-if="item.status === OrderType.ConsultComplete"
     >
-      <consult-more></consult-more>
+      <consult-more
+        :disabled="!item.prescriptionId"
+        @on-delete="deleteConsultOrder(item)"
+        @on-preview="onShowPrescription(item.prescriptionId)"
+      ></consult-more>
       <van-button type="default" round :to="`/room?orderId=${item.id}`">
         问诊记录
       </van-button>
@@ -153,7 +174,13 @@ const { loading, cancelConsultOrder } = useCancelOrder()
       class="detail-action van-hairline--top"
       v-if="item.status === OrderType.ConsultCancel"
     >
-      <van-button type="default" round>删除订单</van-button>
+      <van-button
+        type="default"
+        round
+        :loading="deleteLoading"
+        @click="deleteConsultOrder(item)"
+        >删除订单</van-button
+      >
       <van-button type="primary" round to="/">咨询其他医生</van-button>
     </div>
   </div>
