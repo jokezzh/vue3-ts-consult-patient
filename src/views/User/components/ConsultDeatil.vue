@@ -40,6 +40,8 @@ const onCpoy = async () => {
   await copy(item.value?.orderNo || '')
   showToast('复制成功')
 }
+
+const show = ref(false)
 </script>
 
 <template>
@@ -126,7 +128,9 @@ const onCpoy = async () => {
         @click="cancelConsultOrder(item)"
         >取消问诊</van-button
       >
-      <van-button type="primary" round>继续支付</van-button>
+      <van-button type="primary" round @click="show = true"
+        >继续支付</van-button
+      >
     </div>
 
     <div
@@ -193,6 +197,11 @@ const onCpoy = async () => {
       >
       <van-button type="primary" round to="/">咨询其他医生</van-button>
     </div>
+    <cp-pay-sheet
+      v-model:show="show"
+      :order-id="item.id"
+      :actualPayment="item.actualPayment"
+    ></cp-pay-sheet>
   </div>
 
   <!-- 骨架组件 -->

@@ -69,7 +69,7 @@ onMounted(() => {
 const agree = ref(false)
 
 //生成订单
-const paymentMethod = ref<0 | 1>()
+
 const show = ref(false)
 const orderId = ref('')
 const loading = ref(false)
@@ -106,18 +106,6 @@ const onClose = () => {
       router.push('/user/consult')
       return true
     })
-}
-
-//支付跳转
-const pay = async () => {
-  if (paymentMethod.value === undefined) return showToast('请选择支付方式')
-  showLoadingToast({ message: '跳转支付', duration: 0 })
-  const res = await getConsultOrderPayUrl({
-    orderId: orderId.value,
-    paymentMethod: paymentMethod.value,
-    payCallback: 'http://localhost:5173/room'
-  })
-  window.location.href = res.data.payUrl
 }
 </script>
 
@@ -164,36 +152,12 @@ const pay = async () => {
     />
 
     <!-- 支付抽屉 控制面板-->
-    <van-action-sheet
-      v-model:show="show"
-      title="选择支付方式"
-      :close-on-popstate="false"
-      :closeable="false"
-      :before-close="onClose"
-    >
-      <div class="pay-type">
-        <p class="amount">￥{{ payInfo.actualPayment.toFixed(2) }}</p>
-        <van-cell-group>
-          <van-cell title="微信支付" @click="paymentMethod = 0">
-            <template #icon><cp-icon name="consult-wechat" /></template>
-            <template #extra
-              ><van-checkbox :checked="paymentMethod === 0"
-            /></template>
-          </van-cell>
-          <van-cell title="支付宝支付" @click="paymentMethod = 1">
-            <template #icon><cp-icon name="consult-alipay" /></template>
-            <template #extra
-              ><van-checkbox :checked="paymentMethod === 1"
-            /></template>
-          </van-cell>
-        </van-cell-group>
-        <div class="btn">
-          <van-button type="primary" round block @click="pay"
-            >立即支付</van-button
-          >
-        </div>
-      </div>
-    </van-action-sheet>
+    <cp-pay-sheet
+      :show="show"
+      :order-id="orderId"
+      :actual-payment="payInfo.actualPayment"
+      :on-close="onClose"
+    ></cp-pay-sheet>
   </div>
 
   <div class="consult-pay-page" v-else>

@@ -42,12 +42,8 @@ onMounted(() => {
       orderId: route.query.orderId
     }
   })
-  socket.on('connect', () => {
-    console.log('success')
-  })
-  socket.on('disconnect', () => {
-    console.log('dis')
-  })
+  socket.on('connect', () => {})
+  socket.on('disconnect', () => {})
   socket.on('error', (err) => {
     console.log('error', err)
   })
