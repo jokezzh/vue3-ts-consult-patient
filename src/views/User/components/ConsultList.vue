@@ -14,6 +14,7 @@ const params = ref<ConsultOrderListParams>({
   pageSize: 5
 })
 
+//加载订单
 const loading = ref(false)
 const finished = ref(false)
 const list = ref<ConsultOrderItem[]>([])
@@ -27,6 +28,12 @@ const onLoad = async () => {
   }
   loading.value = false
 }
+
+//删除订单
+const onDelete = (id: string) => {
+  list.value = list.value.filter((item) => item.id !== id)
+  if (!list.value.length) onLoad()
+}
 </script>
 
 <template>
@@ -37,7 +44,11 @@ const onLoad = async () => {
       finished-text="没有更多了"
       @load="onLoad"
     >
-      <consult-item v-for="item in list" :key="item.id" :item="item"
+      <consult-item
+        @on-delete="onDelete"
+        v-for="item in list"
+        :key="item.id"
+        :item="item"
     /></van-list>
   </div>
 </template>
