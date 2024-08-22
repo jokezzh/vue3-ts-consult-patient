@@ -37,7 +37,7 @@ const onLoad = async () => {
       finished-text="没有更多了"
       @load="onLoad"
     >
-      <consult-item v-for="item in list" :key="item.id"
+      <consult-item v-for="item in list" :key="item.id" :item="item"
     /></van-list>
   </div>
 </template>

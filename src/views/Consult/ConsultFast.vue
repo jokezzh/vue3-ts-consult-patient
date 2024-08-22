@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from '@/router'
 import { useConsultStore } from '@/stores'
 
 const store = useConsultStore()
@@ -6,7 +7,11 @@ const store = useConsultStore()
 
 <template>
   <div class="consult-fast-page">
-    <cp-nav-bar title="极速问诊" right-text="问诊记录"></cp-nav-bar>
+    <cp-nav-bar
+      title="极速问诊"
+      right-text="问诊记录"
+      @click-right="router.push('/user/consult')"
+    ></cp-nav-bar>
     <div class="fast-logo">
       <img class="img" src="@/assets/consult-fast.png" alt="" />
       <p class="text"><span>20s</span> 快速匹配专业医生</p>
