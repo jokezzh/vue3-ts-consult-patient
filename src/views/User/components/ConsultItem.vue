@@ -5,7 +5,7 @@ import router from '@/router'
 import { ref } from 'vue'
 import { cancelOrder, deleteOrder } from '@/services/consult'
 import { showFailToast, showSuccessToast } from 'vant'
-import { useShowPrescription } from '@/composables'
+import { useCancelOrder, useShowPrescription } from '@/composables'
 import ConsultMore from './ConsultMore.vue'
 
 defineProps<{ item: ConsultOrderItem }>()
@@ -28,20 +28,7 @@ defineProps<{ item: ConsultOrderItem }>()
 // }
 
 // 取消订单
-const loading = ref(false)
-const cancelConsultOrder = async (item: ConsultOrderItem) => {
-  try {
-    loading.value = true
-    await cancelOrder(item.id)
-    item.status = OrderType.ConsultCancel
-    item.statusValue = '已取消'
-    showSuccessToast('取消成功')
-  } catch (error) {
-    showFailToast('取消失败')
-  } finally {
-    loading.value = false
-  }
-}
+const { loading, cancelConsultOrder } = useCancelOrder()
 
 const emit = defineEmits<{
   (e: 'on-delete', id: string): void
