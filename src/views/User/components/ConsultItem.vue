@@ -5,6 +5,7 @@ import router from '@/router'
 import { computed, ref } from 'vue'
 import { cancelOrder, deleteOrder } from '@/services/consult'
 import { showFailToast, showSuccessToast } from 'vant'
+import { useShowPrescription } from '@/composables'
 
 const props = defineProps<{ item: ConsultOrderItem }>()
 
@@ -19,6 +20,9 @@ const onSelect = (actions: { text: string }, i: number) => {
   if (i === 1) {
     //删除订单
     deleteConsultOrder(props.item)
+  }
+  if (i === 0) {
+    onShowPrescription(props.item.prescriptionId)
   }
 }
 
@@ -55,6 +59,8 @@ const deleteConsultOrder = async (item: ConsultOrderItem) => {
     deleteLoading.value = false
   }
 }
+// 查看处方
+const { onShowPrescription } = useShowPrescription()
 </script>
 
 <template>
@@ -134,6 +140,7 @@ const deleteConsultOrder = async (item: ConsultOrderItem) => {
         plain
         size="small"
         round
+        @click="onShowPrescription(item.prescriptionId)"
       >
         查看处方
       </van-button>
