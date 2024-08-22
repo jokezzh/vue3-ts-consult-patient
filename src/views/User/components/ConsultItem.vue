@@ -2,29 +2,30 @@
 import type { ConsultOrderItem } from '@/types/consult'
 import { OrderType } from '@/enums'
 import router from '@/router'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { cancelOrder, deleteOrder } from '@/services/consult'
 import { showFailToast, showSuccessToast } from 'vant'
 import { useShowPrescription } from '@/composables'
+import ConsultMore from './ConsultMore.vue'
 
-const props = defineProps<{ item: ConsultOrderItem }>()
+defineProps<{ item: ConsultOrderItem }>()
 
 //更多操作
-const showPopver = ref(false)
-const actions = computed(() => [
-  { text: '查看处方', disabled: !props.item.prescriptionId },
-  { text: '删除订单' }
-])
+// const showPopver = ref(false)
+// const actions = computed(() => [
+//   { text: '查看处方', disabled: !props.item.prescriptionId },
+//   { text: '删除订单' }
+// ])
 
-const onSelect = (actions: { text: string }, i: number) => {
-  if (i === 1) {
-    //删除订单
-    deleteConsultOrder(props.item)
-  }
-  if (i === 0) {
-    onShowPrescription(props.item.prescriptionId)
-  }
-}
+// const onSelect = (actions: { text: string }, i: number) => {
+//   if (i === 1) {
+//     //删除订单
+//     deleteConsultOrder(props.item)
+//   }
+//   if (i === 0) {
+//     onShowPrescription(props.item.prescriptionId)
+//   }
+// }
 
 // 取消订单
 const loading = ref(false)
@@ -156,16 +157,12 @@ const { onShowPrescription } = useShowPrescription()
     </div>
 
     <div class="foot" v-if="item.status === OrderType.ConsultComplete">
-      <div class="more">
-        <van-popover
-          v-model:show="showPopver"
-          :actions="actions"
-          @select="onSelect"
-          placement="top-start"
-        >
-          <template #reference> 更多</template>
-        </van-popover>
-      </div>
+      <!-- 更多 -->
+      <consult-more
+        :disabled="!item.prescriptionId"
+        @on-delete="deleteConsultOrder(item)"
+        @on-preview="onShowPrescription(item.prescriptionId)"
+      ></consult-more>
       <van-button
         class="gray"
         plain
