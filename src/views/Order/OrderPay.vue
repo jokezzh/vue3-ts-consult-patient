@@ -126,6 +126,7 @@ const onSubmit = async () => {
       >
     </div>
     <van-submit-bar
+      :loading="loading"
       :price="orderPre.actualPayment * 100"
       button-text="立即支付"
       button-type="primary"
