@@ -58,6 +58,11 @@ const router = createRouter({
       meta: { title: '问诊记录' }
     },
     {
+      path: '/user/consult/:id',
+      component: () => import('@/views/User/components/ConsultDeatil.vue'),
+      meta: { title: '问诊详情' }
+    },
+    {
       path: '/order/pay',
       component: () => import('@/views/Order/OrderPay.vue'),
       meta: { title: '药品支付' }
@@ -68,11 +73,10 @@ const router = createRouter({
       meta: { title: '药品支付详情' }
     },
     {
-      path: '/user/consult/:id',
-      component: () => import('@/views/User/components/ConsultDeatil.vue'),
-      meta: { title: '问诊详情' }
+      path: '/order/:id',
+      component: () => import('@/views/Order/OrderDetail.vue'),
+      meta: { title: '药品订单详情' }
     },
-
     {
       path: '/',
       redirect: '/home',
