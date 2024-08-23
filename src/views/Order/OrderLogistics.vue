@@ -4,6 +4,7 @@ import type { Logistics } from '@/types/order'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
+import AMapLoader from '@amap/amap-jsapi-loader'
 
 // 获取物流信息
 const logistics = ref<Logistics>()
@@ -11,7 +12,26 @@ const route = useRoute()
 onMounted(async () => {
   const res = await getMedicalOrderLogistics(route.params.id as string)
   logistics.value = res.data
+
+  initMap()
 })
+
+// 使用高德地图
+window._AMapSecurityConfig = {
+  securityJsCode: '415e917da833efcf2d5b69f4d821784b'
+}
+const initMap = () => {
+  AMapLoader.load({
+    key: '648ab92e5a0685732e0c2da89d1c7b60',
+    version: '2.0'
+  }).then((AMap) => {
+    // 使用 Amap 初始化地图
+    const map = new AMap.Map('map', {
+      mapStyle: 'amap://styles/whitesmoke',
+      zoom: 12
+    })
+  })
+}
 </script>
 
 <template>
