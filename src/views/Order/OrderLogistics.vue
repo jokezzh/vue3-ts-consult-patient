@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { getMedicalOrderLogistics } from '@/services/order'
-import type { Logistics } from '@/types/order'
-import { onMounted, ref } from 'vue'
+import type { Location, Logistics } from '@/types/order'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 import AMapLoader from '@amap/amap-jsapi-loader'
+import startImg from '@/assets/start.png'
+import endImg from '@/assets/end.png'
+import carImg from '@/assets/car.png'
 
-// 获取物流信息
-const logistics = ref<Logistics>()
 const route = useRoute()
+const logistics = ref<Logistics>()
 onMounted(async () => {
   const res = await getMedicalOrderLogistics(route.params.id as string)
   logistics.value = res.data
@@ -16,19 +18,78 @@ onMounted(async () => {
   initMap()
 })
 
-// 使用高德地图
 window._AMapSecurityConfig = {
-  securityJsCode: '415e917da833efcf2d5b69f4d821784b'
+  securityJsCode: '88d3a2e9f44de289b01b368538953936'
 }
 const initMap = () => {
   AMapLoader.load({
     key: '648ab92e5a0685732e0c2da89d1c7b60',
     version: '2.0'
   }).then((AMap) => {
-    // 使用 Amap 初始化地图
+    // 初始化地图
     const map = new AMap.Map('map', {
+      // 配置对象
       mapStyle: 'amap://styles/whitesmoke',
       zoom: 12
+    })
+    AMap.plugin('AMap.Driving', function () {
+      const driving = new AMap.Driving({
+        map: map,
+        showTraffic: false,
+        hideMarkers: true
+      })
+
+      if (
+        logistics.value?.logisticsInfo &&
+        logistics.value.logisticsInfo.length >= 2
+      ) {
+        const list = [...logistics.value.logisticsInfo]
+        // 创建标记函数
+        const getMarker = (
+          point: Location,
+          image: string,
+          width = 25,
+          height = 30
+        ) => {
+          const icon = new AMap.Icon({
+            size: new AMap.Size(width, height),
+            image,
+            imageSize: new AMap.Size(width, height)
+          })
+          const marker = new AMap.Marker({
+            position: [point?.longitude, point?.latitude],
+            icon: icon,
+            offset: new AMap.Pixel(-width / 2, -height)
+          })
+          return marker
+        }
+        // 起点
+        const start = list.shift()
+        const startMarker = getMarker(start!, startImg)
+        map.add(startMarker)
+        // 终点
+        const end = list.pop()
+        const endMarker = getMarker(end!, endImg)
+        map.add(endMarker)
+
+        driving.search(
+          [start?.longitude, start?.latitude],
+          [end?.longitude, end?.latitude],
+          { waypoints: list.map((item) => [item.longitude, item.latitude]) },
+          () => {
+            // 规划完毕
+            // 运输位置
+            const curr = logistics.value?.currentLocationInfo
+            const currMarker = getMarker(curr!, carImg, 33, 20)
+            map.add(currMarker)
+            // 3s后定位当中间进行缩放
+            setTimeout(() => {
+              map.setFitView([currMarker])
+              map.setZoom(10)
+            }, 3000)
+          }
+        )
+      }
     })
   })
 }
@@ -43,9 +104,7 @@ const initMap = () => {
         <van-icon name="service" />
       </div>
       <div class="current">
-        <p class="status">
-          {{ logistics?.statusValue }} 预计{{ logistics?.estimatedTime }}送达
-        </p>
+        <p class="status">订单派送中 预计{{ logistics?.estimatedTime }}送达</p>
         <p class="predict">
           <span>{{ logistics?.name }}</span>
           <span>{{ logistics?.awbNo }}</span>
@@ -57,7 +116,9 @@ const initMap = () => {
       <van-steps direction="vertical" :active="0">
         <van-step v-for="item in logistics?.list" :key="item.id">
           <p class="status">{{ item.statusValue }}</p>
-          <p class="content">{{ item.content }}</p>
+          <p class="content">
+            {{ item.content }}
+          </p>
           <p class="time">{{ item.createTime }}</p>
         </van-step>
       </van-steps>
