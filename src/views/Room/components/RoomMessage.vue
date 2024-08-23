@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Message } from '@/types/room'
+import type { Message, Prescription } from '@/types/room'
 import type { Image } from '@/types/consult'
 import { showImagePreview, showToast } from 'vant'
 import { useUserStore } from '@/stores'
@@ -7,7 +7,8 @@ import dayjs from 'dayjs'
 import EvaluateCard from './EvaluateCard.vue'
 import { useShowPrescription } from '@/composables'
 import { getConsultFlagText, getIllnessTimeText } from '@/utils/filter'
-import { MsgType } from '@/enums'
+import { MsgType, PrescriptionStatus } from '@/enums'
+import { useRouter } from 'vue-router'
 
 defineProps<{
   item: Message
@@ -25,6 +26,19 @@ const onPreviewImage = (images?: Image[]) => {
 
 //展示处方图片
 const { onShowPrescription } = useShowPrescription()
+
+// 药品购买
+const router = useRouter()
+const buy = (pre?: Prescription) => {
+  if (!pre) return
+  // 处方失效
+  if (pre.status === PrescriptionStatus.Invalid) return showToast('处方已失效')
+  // 没有生成药品订单
+  if (pre.status === PrescriptionStatus.NotPayment && !pre.orderId)
+    return router.push(`/order/pay?id=${pre.id}`)
+  // 已经生成订单
+  router.push(`/order/${pre.orderId}`)
+}
 </script>
 
 <template>
@@ -161,7 +175,7 @@ const { onShowPrescription } = useShowPrescription()
         </div>
       </div>
       <div class="foot">
-        <span>购买药品</span>
+        <span @click="buy(item.msg.prescription)">购买药品</span>
       </div>
     </div>
   </div>
