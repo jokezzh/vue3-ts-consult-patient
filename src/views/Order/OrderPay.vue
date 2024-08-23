@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { getAddressList, getMedicalOrderPre } from '@/services/order'
+import {
+  createMedicalOrder,
+  getAddressList,
+  getMedicalOrderPre
+} from '@/services/order'
 import type { AddressItem, OrderPre } from '@/types/order'
+import { showToast } from 'vant'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -27,6 +32,37 @@ onMounted(async () => {
   loadAddress()
   loadOrderPre()
 })
+
+//支付操作
+const show = ref(false)
+const agree = ref(false)
+const loading = ref(false)
+const orderId = ref('')
+const onSubmit = async () => {
+  if (!agree.value) return showToast('请同意支付协议')
+  if (!address.value) return showToast('请选择收获地址')
+  if (!orderPre.value) return showToast('找不到处方')
+  if (!orderId.value) {
+    //无订单id发请求
+    try {
+      loading.value = true
+      const res = await createMedicalOrder({
+        id: orderPre.value?.id,
+        addressId: address.value?.id,
+        couponId: orderPre.value.couponId
+      })
+      loading.value = false
+      orderId.value = res.data.id
+      //打开支付抽屉
+      show.value = true
+    } catch (error) {
+      loading.value = false
+    }
+  } else {
+    //有订单id直接打开支付抽屉
+    show.value = true
+  }
+}
 </script>
 
 <template>
@@ -85,14 +121,23 @@ onMounted(async () => {
         由于药品的特殊性，如非错发、漏发药品的情况，药品一经发出
         不得退换，请核对药品信息无误后下单。
       </p>
-      <van-checkbox>我已同意<a href="javascript:;">支付协议</a></van-checkbox>
+      <van-checkbox v-model="agree"
+        >我已同意<a href="javascript:;">支付协议</a></van-checkbox
+      >
     </div>
     <van-submit-bar
       :price="orderPre.actualPayment * 100"
       button-text="立即支付"
       button-type="primary"
       text-align="left"
+      @click="onSubmit"
     ></van-submit-bar>
+    <cp-pay-sheet
+      v-model:show="show"
+      :orderId="orderId"
+      :actualPayment="orderPre.actualPayment"
+      payCallback="/order/pay/result"
+    />
   </div>
 
   <!-- 骨架屏 -->
