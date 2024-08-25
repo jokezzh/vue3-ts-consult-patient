@@ -15,6 +15,10 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 80,
+    host: true
+  },
   plugins: [
     vue(),
     // 自动导入的插件，解析器可以是 vant element and-vue

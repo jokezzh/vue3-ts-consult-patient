@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { codeRules, mobileRules, passwordRules } from '@/utils/rules'
-import { onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { showSuccessToast, showToast, type FormInstance } from 'vant'
 import { loginByMobile, loginByPassword, sendMobileCode } from '@/services/user'
 import { useUserStore } from '@/stores'
@@ -122,9 +122,12 @@ onUnmounted(() => {
     <!-- 底部 -->
     <div class="login-other">
       <van-divider>第三方登录</van-divider>
-      <div class="icon">
+      <a
+        class="icon"
+        href="https://graph.qq.com/oauth2.0/authorize?client_id=102015968&response_type=token&scope=all&redirect_uri=http%3A%2F%2Fconsult-patients.itheima.net%2Flogin%2Fcallback"
+      >
         <img src="@/assets/qq.svg" alt="" />
-      </div>
+      </a>
     </div>
   </div>
 </template>

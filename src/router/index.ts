@@ -120,7 +120,7 @@ router.beforeEach((to) => {
   //获取token
   const store = useUserStore()
   //白名单
-  const wihteList = ['/login']
+  const wihteList = ['/login', '/login/callback']
   // 如果没有token，且不在白名单跳转登录
   if (!store.user?.token && !wihteList.includes(to.path)) return '/login'
 })
