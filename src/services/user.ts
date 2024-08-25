@@ -48,3 +48,10 @@ export const getUnredMessageCount = () =>
 //QQ登录
 export const loginByQQ = (openId: string) =>
   request<User>('/login/thirdparty', 'POST', { openId, source: 'qq' })
+
+//绑定手机号
+export const bindMobile = (data: {
+  mobile: string
+  code: string
+  openId: string
+}) => request<User>('/login/binding', 'POST', data)

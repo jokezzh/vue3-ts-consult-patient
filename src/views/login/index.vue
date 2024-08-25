@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { codeRules, mobileRules, passwordRules } from '@/utils/rules'
-import { onUnmounted, ref } from 'vue'
-import { showSuccessToast, showToast, type FormInstance } from 'vant'
-import { loginByMobile, loginByPassword, sendMobileCode } from '@/services/user'
+import { ref } from 'vue'
+import { showSuccessToast, showToast } from 'vant'
+import { loginByMobile, loginByPassword } from '@/services/user'
 import { useUserStore } from '@/stores'
+import { useMobileCode } from '@/composables'
 
 //表单验证数据
 const mobile = ref('')
@@ -36,26 +37,7 @@ const isPass = ref(true)
 const code = ref('')
 
 //发送短信验证码
-const time = ref(0)
-const form = ref<FormInstance>()
-let timer: number
-const onSend = async () => {
-  if (time.value > 0) return
-  //验证手机号
-  await form.value?.validate('mobile')
-  await sendMobileCode(mobile.value, 'login')
-  showToast('发送成功')
-  time.value = 60
-  //开启倒计时
-  if (timer) clearInterval(timer)
-  timer = setInterval(() => {
-    time.value--
-    if (time.value <= 0) clearInterval(timer)
-  }, 1000)
-}
-onUnmounted(() => {
-  clearInterval(timer)
-})
+const { time, onSend, form } = useMobileCode(mobile)
 </script>
 
 <template>
@@ -124,6 +106,7 @@ onUnmounted(() => {
       <van-divider>第三方登录</van-divider>
       <a
         class="icon"
+        @click="store.setReturnUrl(route.query.returnUrl as string)"
         href="https://graph.qq.com/oauth2.0/authorize?client_id=102015968&response_type=token&scope=all&redirect_uri=http%3A%2F%2Fconsult-patients.itheima.net%2Flogin%2Fcallback"
       >
         <img src="@/assets/qq.svg" alt="" />

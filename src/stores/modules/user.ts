@@ -15,7 +15,10 @@ export const useUserStore = defineStore(
     const delUser = () => {
       user.value = undefined
     }
-    return { user, setUser, delUser }
+    // 记录回跳地址
+    const returnUrl = ref('')
+    const setReturnUrl = (url: string) => (returnUrl.value = url)
+    return { user, setUser, delUser, returnUrl, setReturnUrl }
   },
   {
     persist: true
