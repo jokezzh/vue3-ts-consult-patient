@@ -13,6 +13,8 @@ import { VantResolver } from 'unplugin-vue-components/resolvers'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import path from 'path'
 
+import { createHtmlPlugin } from 'vite-plugin-html'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
@@ -20,6 +22,7 @@ export default defineConfig({
     host: true
   },
   plugins: [
+    createHtmlPlugin(),
     vue(),
     // 自动导入的插件，解析器可以是 vant element and-vue
     Components({

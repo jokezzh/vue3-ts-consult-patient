@@ -132,7 +132,7 @@ router.beforeEach((to) => {
 
 //后置导航
 router.afterEach((to) => {
-  document.title = `${to.meta.title || ''} - 优医问诊`
+  document.title = `${to.meta.title || ''} - ${import.meta.env.VITE_APP_TITLE}`
   //关闭进度条
   NProgress.done()
 })
